@@ -7,22 +7,29 @@ load_dotenv()
 
 # --- Dynamic Getters ---
 
+
 def get_data_dir() -> Path:
     return Path(os.environ.get("LLM_TODO_DATA_DIR", "~/.llm-todo")).expanduser()
+
 
 def get_config_name() -> str:
     return os.environ.get("LLM_TODO_CONFIG_PATH", "config.json")
 
+
 def get_task_name() -> str:
     return os.environ.get("LLM_TODO_TASK_NAME", "tasks.json")
+
 
 def get_config_path() -> Path:
     return get_data_dir() / get_config_name()
 
+
 def get_task_path() -> Path:
     return get_data_dir() / get_task_name()
 
+
 # --- Core Functions ---
+
 
 def init(task_file_path: str = None) -> dict:
     """Initialize and create config and task files.
@@ -52,10 +59,12 @@ def init(task_file_path: str = None) -> dict:
 
     return config
 
+
 def load_config() -> dict:
     """Load and return the current config."""
     with open(get_config_path(), "r") as f:
         return json.load(f)
+
 
 def update_config(new_values: dict):
     """Update config values and write back to disk."""

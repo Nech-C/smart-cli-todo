@@ -2,6 +2,7 @@ import tempfile
 import pytest
 from src.config import init
 
+
 @pytest.fixture
 def isolated_config_env(monkeypatch):
     """Creates a temp config dir and runs init(). Cleans up after test."""
