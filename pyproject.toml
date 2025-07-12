@@ -1,0 +1,19 @@
+[project]
+name = "smart-cli-todo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "python-dotenv>=1.1.1",
+]
+
+[dependency-groups]
+dev = [
+    "isort>=6.0.1",
+    "mypy>=1.16.1",
+    "pre-commit>=4.2.0",
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "ruff>=0.12.3",
+]
