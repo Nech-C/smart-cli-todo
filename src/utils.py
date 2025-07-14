@@ -1,10 +1,11 @@
+# src/utils.py
 from datetime import date, timedelta, datetime
-from typing import List
+from typing import List, Optional
 
 
 def parse_task_parts(parts: List[str]) -> dict:
-    name_parts = []
-    description_parts = []
+    """Parse CLI parts into a task dict (name, description, due, repeat)."""
+    name_parts, description_parts = [], []
     due = None
     repeat = False
     parsing_desc = False
@@ -13,26 +14,26 @@ def parse_task_parts(parts: List[str]) -> dict:
         if part.startswith("/"):
             parsing_desc = False
             if part.startswith("/d"):
-                # Start of description
                 parsing_desc = True
-                desc_text = part[2:]  # remove /d
-                if desc_text:
-                    description_parts.append(desc_text)
+                text = part[2:]
+                if text:
+                    description_parts.append(text)
             elif part == "/repeat":
                 repeat = True
-            else:  # has to be due time
+            else:
                 due = part[1:]
         else:
             if parsing_desc:
                 description_parts.append(part)
             else:
                 name_parts.append(part)
+
+    due_date = None
     if due:
         due_date = parse_date(due)
         if not due_date:
             print(
-                f"Failed to parse {due}! Please use"
-                " a correct format: today, tomorrow, or 11-11-1111"
+                f"Failed to parse '{due}'! Please use 'today', 'tomorrow', or 'YYYY-MM-DD'"
             )
     return {
         "name": " ".join(name_parts),
@@ -42,7 +43,8 @@ def parse_task_parts(parts: List[str]) -> dict:
     }
 
 
-def parse_date(date_str):
+def parse_date(date_str: str) -> Optional[date]:
+    """Convert a string into a date object."""
     if date_str == "today":
         return date.today()
     if date_str == "tomorrow":

@@ -1,5 +1,6 @@
+# test_config.py
 from pathlib import Path
-from src.config import get_config_path, get_task_path, load_config, update_config
+from config import get_config_path, get_task_path, load_config, update_config
 
 
 def test_init(isolated_config_env):

@@ -1,6 +1,7 @@
+# conftest.py
 import tempfile
 import pytest
-from src.config import init
+from config import init
 
 
 @pytest.fixture

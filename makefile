@@ -5,4 +5,4 @@ clear-all:
 	clearn_config
 
 test-all:
-	PYTHONPATH=. uv run pytest tests/
+	PYTHONPATH=./src uv run pytest tests/

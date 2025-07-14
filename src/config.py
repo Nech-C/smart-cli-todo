@@ -5,8 +5,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# --- Dynamic Getters ---
-
 
 def get_data_dir() -> Path:
     return Path(os.environ.get("LLM_TODO_DATA_DIR", "~/.llm-todo")).expanduser()
@@ -28,19 +26,12 @@ def get_task_path() -> Path:
     return get_data_dir() / get_task_name()
 
 
-# --- Core Functions ---
+def get_history_path() -> Path:
+    # for undo
+    return get_data_dir() / "last_action.json"
 
 
 def init(task_file_path: str = None) -> dict:
-    """Initialize and create config and task files.
-
-    Args:
-        task_file_path (str, optional): The path to the task file. If None,
-        it defaults to ~/.llm-todo/tasks.json or the env override.
-
-    Returns:
-        dict: The written config dictionary.
-    """
     data_dir = get_data_dir()
     data_dir.mkdir(parents=True, exist_ok=True)
 
@@ -49,25 +40,25 @@ def init(task_file_path: str = None) -> dict:
 
     config = {"task_file": task_file_path}
     config_path = get_config_path()
-
     with open(config_path, "w") as f:
         json.dump(config, f, indent=2)
 
+    # ensure the two JSON stores exist
     if not os.path.exists(task_file_path):
         with open(task_file_path, "w") as f:
             json.dump({"tasks": []}, f, indent=2)
-
+    hist = get_history_path()
+    if not hist.exists():
+        hist.write_text("")  # start empty
     return config
 
 
 def load_config() -> dict:
-    """Load and return the current config."""
     with open(get_config_path(), "r") as f:
         return json.load(f)
 
 
 def update_config(new_values: dict):
-    """Update config values and write back to disk."""
     config = load_config()
     config.update(new_values)
     with open(get_config_path(), "w") as f:
