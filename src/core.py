@@ -1,5 +1,5 @@
 from uuid import uuid4
-from datetime import datetime
+from datetime import datetime, timezone
 from storage import (
     add_task_to_storage,
     load_tasks_from_storage,
@@ -12,7 +12,7 @@ from storage import (
 
 def add_task(task: dict) -> dict:
     task["id"] = str(uuid4())
-    task["created_at"] = datetime.utcnow().isoformat()
+    task["created_at"] = datetime.now(timezone.utc).isoformat()
     task["completed"] = False
     t = add_task_to_storage(task)
     return {"info": f"Added task '{t['name']}'", "task": t}

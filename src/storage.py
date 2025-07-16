@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from copy import deepcopy
 from config import get_task_path, get_history_path
 
@@ -62,7 +62,7 @@ def update_task_in_storage(task_id: str, fields: dict) -> dict:
             for k, v in fields.items():
                 if v is not None:
                     t[k] = v
-            t["updated_at"] = datetime.utcnow().isoformat()
+            t["updated_at"] = datetime.now(timezone.utc).isoformat()
             tasks[i] = t
             save_tasks_to_storage(tasks)
             _write_history({"action": "update", "before": before, "after": t})
@@ -76,7 +76,7 @@ def finish_task_in_storage(task_id: str) -> dict:
         if t["id"] == task_id:
             before = deepcopy(t)
             t["completed"] = True
-            t["completed_at"] = datetime.utcnow().isoformat()
+            t["completed_at"] = datetime.now(timezone.utc).isoformat()
             tasks[i] = t
             save_tasks_to_storage(tasks)
             _write_history({"action": "finish", "before": before, "after": t})
