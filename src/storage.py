@@ -77,6 +77,7 @@ def finish_task_in_storage(task_id: str) -> dict:
             before = deepcopy(t)
             t["completed"] = True
             t["completed_at"] = datetime.now(timezone.utc).isoformat()
+            t["status"] = "done"  # ✅ REQUIRED for filtering
             tasks[i] = t
             save_tasks_to_storage(tasks)
             _write_history({"action": "finish", "before": before, "after": t})

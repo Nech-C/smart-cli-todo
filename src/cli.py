@@ -8,6 +8,8 @@ from core import (
     finish_task,
     remove_task,
     undo_last_action,
+    search_task,
+    init_todo,
 )
 
 app = typer.Typer()
@@ -144,6 +146,16 @@ def undo():
     """
     result = undo_last_action()
     typer.echo(result["info"])
+
+
+@app.command()
+def search(query):
+    typer.echo(search_task(query))
+
+
+@app.command()
+def init():
+    init_todo()
 
 
 if __name__ == "__main__":

@@ -38,7 +38,11 @@ def init(task_file_path: str = None) -> dict:
     if not task_file_path:
         task_file_path = str(get_task_path())
 
-    config = {"task_file": task_file_path}
+    config = {
+        "task_file": task_file_path,
+        "chroma_dir": str(get_data_dir() / "chroma_db"),
+        "hf_embedder_repo": "all-MiniLM-L6-v2",
+    }
     config_path = get_config_path()
     with open(config_path, "w") as f:
         json.dump(config, f, indent=2)
@@ -50,12 +54,17 @@ def init(task_file_path: str = None) -> dict:
     hist = get_history_path()
     if not hist.exists():
         hist.write_text("")  # start empty
+
     return config
 
 
 def load_config() -> dict:
-    with open(get_config_path(), "r") as f:
-        return json.load(f)
+    try:
+        with open(get_config_path(), "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        init()
+        return load_config()
 
 
 def update_config(new_values: dict):
@@ -63,3 +72,13 @@ def update_config(new_values: dict):
     config.update(new_values)
     with open(get_config_path(), "w") as f:
         json.dump(config, f, indent=2)
+
+
+def get_embedder_repo() -> str:
+    config = load_config()
+    return config["hf_embedder_repo"]
+
+
+def get_chroma_dir() -> Path:
+    config = load_config()
+    return config["chroma_dir"]
