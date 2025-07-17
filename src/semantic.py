@@ -14,7 +14,7 @@ def _get_embedder():
 
 @lru_cache(maxsize=1)
 def _get_vector_store():
-    return Chroma("todo_list", _get_embedder(), get_chroma_dir())
+    return Chroma("todo_list", _get_embedder(), str(get_chroma_dir()))
 
 
 def add_task_vector(task: dict):
