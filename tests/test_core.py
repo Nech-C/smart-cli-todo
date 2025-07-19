@@ -25,14 +25,14 @@ def test_core_full_flow(isolated_config_env):
     # update name
     upd = update_task(tid, {"name": "do more stuff"})
     assert "Updated task" in upd["info"]
-    all_tasks = list_tasks(include_completed=True)
+    all_tasks = list_tasks()
     assert all_tasks[0]["name"] == "do more stuff"
 
     # finish it
     fin = finish_task(tid)
     assert "Finished task" in fin["info"]
-    assert list_tasks() == []  # no pending
-    assert list_tasks(include_completed=True)[0]["completed"]
+    assert list_tasks("ongoing") == []  # no pending
+    assert list_tasks()[0]["completed"]
 
     # undo finish
     u1 = undo_last_action()
@@ -42,7 +42,7 @@ def test_core_full_flow(isolated_config_env):
     # remove it
     rm = remove_task(tid)
     assert "Removed task" in rm["info"]
-    assert list_tasks(include_completed=True) == []
+    assert list_tasks("all") == []
 
     # undo removal
     u2 = undo_last_action()

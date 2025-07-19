@@ -6,10 +6,10 @@ from core import (
     list_tasks,
     update_task,
     finish_task,
-    remove_task,
     undo_last_action,
     search_task,
     init_todo,
+    remove_task,
 )
 
 app = typer.Typer()
@@ -25,10 +25,10 @@ def add(task_parts: List[str]):
     typer.echo(result["info"])
 
 
-@app.command(name="list")
-def _list(
+@app.command()
+def list(
     which: Optional[str] = typer.Argument(
-        None, help="Which tasks to show:  (none)=pending, 'done', or 'all'"
+        "", help="Which tasks to show:  (none)= 'ongoing', 'done', or 'all'"
     ),
 ):
     """
@@ -37,15 +37,17 @@ def _list(
     llm-todo list all       # show everything
     """
     # pick the right slice
-    if which is None:
-        tasks = list_tasks(include_completed=False)
-    elif which.lower() == "done":
-        # get everything, then filter to only completed
-        tasks = [t for t in list_tasks(include_completed=True) if t["completed"]]
-    elif which.lower() == "all":
-        tasks = list_tasks(include_completed=True)
+    which = which.lower()
+    if which == "":
+        tasks = list_tasks(status="ongoing")
+    elif which == "done":
+        tasks = list_tasks(status="done")
+    elif which == "all":
+        tasks = list_tasks(status="all")
+    elif which == "ongoing":
+        tasks = list_tasks(status="ongoing")
     else:
-        typer.echo("❗️ Invalid argument. Use `done` or `all`.")
+        typer.echo("❗️ Invalid argument. Use `ongoing`, `done` or `all`.")
         raise typer.Exit(1)
 
     if not tasks:
@@ -53,67 +55,79 @@ def _list(
         raise typer.Exit()
 
     # display with simple 1-based index
-    for idx, t in enumerate(tasks, start=1):
+    for t in tasks:
         status = "✅" if t["completed"] else "❌"
         due = t.get("due") or ""
-        typer.echo(f"{idx}. {status} {t['name']} (due: {due})")
+        typer.echo(f"{status} {t['name']} (due: {due})")
 
 
 @app.command()
-def finish(task_parts: List[str] = typer.Argument(None)):
+def finish():
     """
-    Mark a task as done. If no <n> provided, prompts you to pick one.
+    finish an ongoing task. It prompts the user to select the task
     """
-    pending = list_tasks()
-    if not pending:
-        typer.echo("No pending tasks to finish.")
-        raise typer.Exit()
+    tasks = list_tasks("ongoing")
+    tasks.sort(key=lambda x: x["created_at"])
+    for idx, task in enumerate(tasks, start=1):
+        task["number"] = idx
+        typer.echo(f"❌ {idx}. {task['name']} due: {task['due']}")
+    while True:
+        choices = input(
+            "Type in the id(s) of tasks you have finished(separated by commas):"
+        )
+        choices = choices.split(",")
+        try:
+            choices = [int(choice.strip()) for choice in choices]
+        except ValueError:
+            print("Incorrect input format! try 1 or 1, 2, 3!")
 
-    if not task_parts:
-        # interactive
-        for idx, t in enumerate(pending, start=1):
-            typer.echo(f"{idx}. ❌ {t['name']}")
-        choice = typer.prompt("Enter task number to finish")
-    else:
-        choice = task_parts[0]
+        if min(choices) < 1 or max(choices) > len(tasks):
+            print("ids out of bounds!")
+        else:
+            break
 
-    try:
-        n = int(choice) - 1
-        task_id = pending[n]["id"]
-    except Exception:
-        typer.echo("Invalid task number.")
-        raise typer.Exit(1)
-
-    result = finish_task(task_id)
-    typer.echo(result["info"])
+    for task in tasks:
+        if task["number"] in choices:
+            result = finish_task(task["id"])
+            print(result["info"])
 
 
 @app.command()
-def remove(task_parts: List[str] = typer.Argument(None)):
-    """
-    Remove a task. If no <n> provided, prompts you to pick one.
-    """
-    pending = list_tasks()
-    if not pending:
-        typer.echo("No pending tasks to remove.")
-        raise typer.Exit()
-
-    if not task_parts:
-        for idx, t in enumerate(pending, start=1):
-            typer.echo(f"{idx}. ❌ {t['name']}")
-        choice = typer.prompt("Enter task number to remove")
-    else:
-        choice = task_parts[0]
-
-    try:
-        n = int(choice) - 1
-        task_id = pending[n]["id"]
-    except Exception:
-        typer.echo("Invalid task number.")
+def remove(
+    which: Optional[str] = typer.Argument(
+        "ongoing", help="Which tasks to show:  (none)= 'ongoing', 'done', or 'all'"
+    ),
+):
+    which = which.lower()
+    if which not in ["ongoing", "done", "all"]:
+        typer.echo("❗️ Invalid argument. Use `ongoing`, `done` or `all`.")
         raise typer.Exit(1)
 
-    result = remove_task(task_id)
-    typer.echo(result["info"])
+    tasks = list_tasks(which)
+    tasks.sort(key=lambda x: x["created_at"])
+    for idx, task in enumerate(tasks, start=1):
+        task["number"] = idx
+        symbol = "❌" if task["status"] == "ongoing" else "✅"
+        typer.echo(f"{symbol} {idx}. {task['name']} due: {task['due']}")
+    while True:
+        choices = input(
+            "Type in the id(s) of tasks you want to remove(separated by commas):"
+        )
+        choices = choices.split(",")
+        try:
+            choices = [int(choice.strip()) for choice in choices]
+        except ValueError:
+            print("Incorrect input format! try something like 1 or 1, 2, 3!")
+
+        if min(choices) < 1 or max(choices) > len(tasks):
+            print("ids out of bounds!")
+        else:
+            break
+
+    for task in tasks:
+        if task["number"] in choices:
+            result = remove_task(task["id"])
+            print(result["info"])
 
 
 @app.command()
@@ -150,7 +164,17 @@ def undo():
 
 @app.command()
 def search(query):
-    typer.echo(search_task(query))
+    # TODO: return ids
+    tasks = search_task(query)
+    for task in tasks:
+        typer.echo(task)
+
+
+@app.command()
+def chat(prompt: str):
+    # response = agent.run(prompt)
+    # typer.echo(response)
+    pass
 
 
 @app.command()
