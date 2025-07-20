@@ -21,6 +21,7 @@ def init(force: bool = False) -> dict:
             "chroma_dir": str(get_data_dir() / "chroma_db"),
             "history_file": str(get_data_dir() / "last_action.json"),
             "hf_embedder_repo": "all-MiniLM-L6-v2",
+            "vector_store_queue_path": str(get_data_dir() / "vector_store_queue.json"),
         }
         with open(config_path, "w") as f:
             json.dump(config, f, indent=2)
@@ -33,6 +34,11 @@ def init(force: bool = False) -> dict:
     history_path = get_history_path()
     if force or not history_path.exists():
         history_path.write_text("")
+
+    vector_store_queue_path = get_vector_store_queue_path()
+    if force or not vector_store_queue_path.exists():
+        with vector_store_queue_path.open("w") as f:
+            json.dump([], f, indent=2)
 
     return config
 
@@ -71,3 +77,7 @@ def get_config_path() -> Path:
 
 def get_history_path() -> Path:
     return Path(load_config()["history_file"])
+
+
+def get_vector_store_queue_path() -> Path:
+    return Path(load_config()["vector_store_queue_path"])

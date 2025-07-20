@@ -3,7 +3,7 @@ from enum import Enum
 from uuid import uuid4
 from datetime import datetime, timezone
 
-from storage import (
+from src.storage import (
     add_task_to_storage,
     load_tasks_from_storage,
     remove_task_from_storage,
@@ -11,8 +11,8 @@ from storage import (
     finish_task_in_storage,
     undo_last_action_storage,
 )
-from semantic import add_task_vector, search_task_vector, remove_task_vector
-from config import init
+from src.semantic import search_task_vector, lazy_vector_action
+from src.config import init
 
 
 class Status(Enum):
@@ -38,10 +38,9 @@ def add_task(task: dict) -> dict:
     task["completed"] = False
     task["text"] = task["name"] + task["description"]
     task["metadata"] = {"status": task["status"]}
-    task["indexed"] = False
 
     add_task_to_storage(task)
-
+    lazy_vector_action(task, "add")
     return {"info": f"Added task '{task['name']}'", "task": task}
 
 
@@ -76,7 +75,7 @@ def finish_task(task_id: str) -> dict:
 
 def remove_task(task_id: str) -> dict:
     t = remove_task_from_storage(task_id)
-    remove_task_vector(task_id)
+    lazy_vector_action(task_id, "remove")
     return {"info": f"Removed task '{t['name']}'", "task": t}
 
 
@@ -84,16 +83,7 @@ def undo_last_action() -> dict:
     return undo_last_action_storage()
 
 
-def _index_tasks():
-    tasks = load_tasks_from_storage()
-    unindexed_tasks = [task for task in tasks if not task["indexed"]]
-
-    for task in unindexed_tasks:
-        add_task_vector(task)
-
-
 def search_task(query: str, k: int = 5):
-    _index_tasks()
     results = search_task_vector(query, k)
     tasks, _ = zip(*results)
     return tasks

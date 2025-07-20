@@ -1,7 +1,7 @@
 import typer
 from typing import List, Optional
-from utils import parse_task_parts
-from core import (
+from src.utils import parse_task_parts
+from src.core import (
     add_task,
     list_tasks,
     update_task,
@@ -141,7 +141,7 @@ def update(task_parts: List[str]):
 
     # pick your task
     idx = int(task_parts[0]) - 1
-    all_tasks = list_tasks(include_completed=True)
+    all_tasks = list_tasks(status="all")
     try:
         task_id = all_tasks[idx]["id"]
     except IndexError:

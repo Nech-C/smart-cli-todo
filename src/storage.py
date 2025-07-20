@@ -1,7 +1,8 @@
 import json
 from datetime import datetime, timezone
 from copy import deepcopy
-from config import get_task_path, get_history_path
+
+from src.config import get_task_path, get_history_path
 
 
 def _read_history():

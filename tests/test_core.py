@@ -1,5 +1,5 @@
 # tests/test_core.py
-from core import (
+from src.core import (
     add_task,
     list_tasks,
     update_task,

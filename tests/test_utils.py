@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from utils import parse_date, parse_task_parts
+from src.utils import parse_date, parse_task_parts
 
 
 def test_parse_date_basic():
