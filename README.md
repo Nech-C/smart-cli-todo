@@ -12,7 +12,11 @@ pip install -e .
 llm-todo init
 ```
    Use the environment variable `LLM_TODO_DATA_DIR` if you want the data elsewhere.
-
+4. Install ollama and download qwen
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull qwen2.5:0.5b
+```
 ## Usage
 ### Add
 ```bash
