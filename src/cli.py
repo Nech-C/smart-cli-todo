@@ -11,6 +11,7 @@ from src.core import (
     init_todo,
     remove_task,
 )
+from src.llm import run
 
 app = typer.Typer()
 
@@ -171,10 +172,11 @@ def search(query):
 
 
 @app.command()
-def chat(prompt: str):
-    # response = agent.run(prompt)
-    # typer.echo(response)
-    pass
+def chat(task_parts: List[str]):
+    prompt = "".join(task_parts)
+    responses = run(prompt)
+    response = responses["messages"][-1].content
+    typer.echo(response)
 
 
 @app.command()

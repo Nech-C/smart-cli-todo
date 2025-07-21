@@ -22,6 +22,7 @@ def init(force: bool = False) -> dict:
             "history_file": str(get_data_dir() / "last_action.json"),
             "hf_embedder_repo": "all-MiniLM-L6-v2",
             "vector_store_queue_path": str(get_data_dir() / "vector_store_queue.json"),
+            "ollama_model": "qwen2.5:0.5b",
         }
         with open(config_path, "w") as f:
             json.dump(config, f, indent=2)
@@ -81,3 +82,7 @@ def get_history_path() -> Path:
 
 def get_vector_store_queue_path() -> Path:
     return Path(load_config()["vector_store_queue_path"])
+
+
+def get_ollama_model_id() -> str:
+    return load_config().get("ollama_model", "qwen2.5:0.5b")
