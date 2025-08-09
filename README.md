@@ -68,7 +68,7 @@ Recreate configuration and data files:
 llm-todo init
 ```
 
-## Nuances
+## Notes
 * Vector store operations are **lazy**. When you add or remove tasks the changes are queued. Running a search (or calling `commit_vector_tasks` manually) applies all pending updates.
 * All data lives in `~/.llm-todo` unless `LLM_TODO_DATA_DIR` is set.
 
